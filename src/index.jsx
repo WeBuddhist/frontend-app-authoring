@@ -179,6 +179,7 @@ initialize({
         LIBRARY_UNSUPPORTED_BLOCKS: (process.env.LIBRARY_UNSUPPORTED_BLOCKS || 'conditional,step-builder,problem-builder').split(','),
         COURSE_TEAM_SUPPORT_EMAIL: process.env.COURSE_TEAM_SUPPORT_EMAIL || null,
         ADMIN_CONSOLE_URL: process.env.ADMIN_CONSOLE_URL || null,
+        STUDIO_EXTENSION_MFE_URL: process.env.STUDIO_EXTENSION_MFE_URL || null,
       }, 'CourseAuthoringConfig');
     },
   },

@@ -33,6 +33,7 @@ import { UnlinkModal } from '@src/generic/unlink-modal';
 import AlertMessage from '@src/generic/alert-message';
 import getPageHeadTitle from '@src/generic/utils';
 import CourseOutlineHeaderActionsSlot from '@src/plugin-slots/CourseOutlineHeaderActionsSlot';
+import CourseOutlineCreateToolsSlot from '@src/plugin-slots/CourseOutlineCreateToolsSlot';
 import { ContainerType } from '@src/generic/key-utils';
 import { ComponentPicker, SelectedComponent } from '@src/library-authoring';
 import { ContentType } from '@src/library-authoring/routes';
@@ -545,28 +546,26 @@ const CourseOutline = ({ courseId }: CourseOutlineProps) => {
                         ) : (
                           <EmptyPlaceholder>
                             <>
-                              {courseActions.childAddable && isAiEnabled && (
-                                <div className="d-flex flex-column align-items-center mb-3">
-                                  <Button
-                                    variant="primary"
-                                    iconBefore={SparkleIcon}
-                                    onClick={() => setIsAiModalOpen(true)}
-                                  >
-                                    {intl.formatMessage(aiMessages.launchButton)}
-                                  </Button>
-                                  <p className="small text-gray-500 mt-2 mb-0">
-                                    {intl.formatMessage(aiMessages.launchButtonDescription)}
-                                  </p>
-                                </div>
+                              {courseActions.childAddable && (
+                                <CourseOutlineCreateToolsSlot
+                                  courseId={courseId}
+                                  isAiEnabled={isAiEnabled}
+                                  onOpenAiAssistant={() => setIsAiModalOpen(true)}
+                                />
                               )}
                               {courseActions.childAddable && (
-                                <OutlineAddChildButtons
-                                  handleNewButtonClick={handleNewSectionSubmit}
-                                  handleUseFromLibraryClick={openAddLibrarySectionModal}
-                                  childType={ContainerType.Section}
-                                  btnVariant="primary"
-                                  btnClasses="mt-1"
-                                />
+                                <div className="outline-empty-placeholder__manual">
+                                  <p className="outline-empty-placeholder__manual-label">
+                                    {intl.formatMessage(messages.emptyPlaceholderManualLabel)}
+                                  </p>
+                                  <OutlineAddChildButtons
+                                    handleNewButtonClick={handleNewSectionSubmit}
+                                    handleUseFromLibraryClick={openAddLibrarySectionModal}
+                                    childType={ContainerType.Section}
+                                    btnVariant="outline-primary"
+                                    btnClasses="mt-2"
+                                  />
+                                </div>
                               )}
                             </>
                           </EmptyPlaceholder>
