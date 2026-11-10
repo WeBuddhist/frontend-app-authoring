@@ -75,11 +75,6 @@ const messages = defineMessages({
     defaultMessage: 'Select section',
     description: 'Section modal picker title text in outline',
   },
-  emptyPlaceholderManualLabel: {
-    id: 'course-authoring.course-outline.empty-placeholder.manual-label',
-    defaultMessage: 'or build it yourself',
-    description: 'Label above the "New section" and "Use section from library" buttons on the empty course outline, below the "Create with a tool" menu',
-  },
 });
 
 export default messages;
