@@ -14,6 +14,7 @@ jest.mock('./requests', () => ({
   batchUploadAssets: (args) => ({ batchUploadAssets: args }),
   fetchStudioView: (args) => ({ fetchStudioView: args }),
   fetchImages: (args) => ({ fetchImages: args }),
+  fetchAudios: (args) => ({ fetchAudios: args }),
   fetchVideos: (args) => ({ fetchVideos: args }),
   fetchCourseDetails: (args) => ({ fetchCourseDetails: args }),
 }));
@@ -36,7 +37,7 @@ describe('app thunkActions', () => {
   let getState;
   beforeEach(() => {
     dispatch = jest.fn((action) => ({ dispatch: action }));
-    getState = jest.fn().mockImplementation(() => ({ app: { blockId: 'blockId', images: {} } }));
+    getState = jest.fn().mockImplementation(() => ({ app: { blockId: 'blockId', images: {}, audios: {} } }));
   });
   describe('fetchBlock', () => {
     beforeEach(() => {
@@ -128,6 +129,26 @@ describe('app thunkActions', () => {
       }));
     });
   });
+  describe('fetchAudios', () => {
+    beforeEach(() => {
+      thunkActions.fetchAudios({ pageNumber: 0, searchString: 'lecture' })(dispatch);
+      [[dispatchedAction]] = dispatch.mock.calls;
+    });
+    it('forwards the search string', () => {
+      expect(dispatchedAction.fetchAudios.searchString).toEqual('lecture');
+    });
+    it('stores fetched audio assets', () => {
+      dispatchedAction.fetchAudios.onSuccess({ audios: {}, audioCount: 0 });
+      expect(dispatch).toHaveBeenCalledWith(actions.app.setAudios({ audios: {}, audioCount: 0 }));
+    });
+    it('stores an audio fetch failure', () => {
+      dispatchedAction.fetchAudios.onFailure(testValue);
+      expect(dispatch).toHaveBeenCalledWith(actions.requests.failRequest({
+        requestKey: RequestKeys.fetchAudios,
+        error: testValue,
+      }));
+    });
+  });
   describe('fetchVideos', () => {
     beforeEach(() => {
       thunkActions.fetchVideos()(dispatch);
@@ -179,6 +200,7 @@ describe('app thunkActions', () => {
         fetchUnit,
         fetchStudioView,
         fetchImages,
+        fetchAudios,
         fetchVideos,
         fetchCourseDetails,
       } = thunkActions;
@@ -186,6 +208,7 @@ describe('app thunkActions', () => {
       thunkActions.fetchUnit = () => 'fetchUnit';
       thunkActions.fetchStudioView = () => 'fetchStudioView';
       thunkActions.fetchImages = () => 'fetchImages';
+      thunkActions.fetchAudios = () => 'fetchAudios';
       thunkActions.fetchVideos = () => 'fetchVideos';
       thunkActions.fetchCourseDetails = () => 'fetchCourseDetails';
       thunkActions.initialize(testValue)(dispatch);
@@ -198,6 +221,7 @@ describe('app thunkActions', () => {
       thunkActions.fetchUnit = fetchUnit;
       thunkActions.fetchStudioView = fetchStudioView;
       thunkActions.fetchImages = fetchImages;
+      thunkActions.fetchAudios = fetchAudios;
       thunkActions.fetchVideos = fetchVideos;
       thunkActions.fetchCourseDetails = fetchCourseDetails;
     });
@@ -225,6 +249,7 @@ describe('app thunkActions', () => {
         fetchUnit,
         fetchStudioView,
         fetchImages,
+        fetchAudios,
         fetchVideos,
         fetchCourseDetails,
       } = thunkActions;
@@ -232,6 +257,7 @@ describe('app thunkActions', () => {
       thunkActions.fetchUnit = () => 'fetchUnit';
       thunkActions.fetchStudioView = () => 'fetchStudioView';
       thunkActions.fetchImages = () => 'fetchImages';
+      thunkActions.fetchAudios = () => 'fetchAudios';
       thunkActions.fetchVideos = () => 'fetchVideos';
       thunkActions.fetchCourseDetails = () => 'fetchCourseDetails';
       const data = {
@@ -247,11 +273,13 @@ describe('app thunkActions', () => {
         [thunkActions.fetchBlock()],
         [thunkActions.fetchUnit()],
         [thunkActions.fetchImages()],
+        [thunkActions.fetchAudios()],
       ]);
       thunkActions.fetchBlock = fetchBlock;
       thunkActions.fetchUnit = fetchUnit;
       thunkActions.fetchStudioView = fetchStudioView;
       thunkActions.fetchImages = fetchImages;
+      thunkActions.fetchAudios = fetchAudios;
       thunkActions.fetchVideos = fetchVideos;
       thunkActions.fetchCourseDetails = fetchCourseDetails;
     });
@@ -386,15 +414,14 @@ describe('app thunkActions', () => {
         error,
       }));
     });
-    test('should call batchUploadAssets if the block has images', () => {
-      mockImageData.map(image => ({ ...image, file: 'file' }));
-      getState.mockReturnValueOnce({ app: { blockId: '', images: mockImageData } });
+    test('should call batchUploadAssets with temporary assets', () => {
+      getState.mockReturnValueOnce({ app: { blockId: '', images: mockImageData, audios: {} } });
       const data = { id: 'block-id' };
       dispatchedAction.createBlock.onSuccess(data);
       expect(dispatch).toHaveBeenCalledWith(actions.app.setBlockId(data.id));
       expect(dispatch.mock.calls[2][0]).toEqual({
         [RequestKeys.batchUploadAssets]: {
-          assets: mockImageData.map(image => image.file),
+          assets: mockImageData,
           content: { data: expect.any(Object) },
           onSuccess: expect.any(Function),
           onFailure: expect.any(Function),
@@ -420,6 +447,21 @@ describe('app thunkActions', () => {
       [[dispatchedAction]] = dispatch.mock.calls;
       dispatchedAction.uploadAsset.onSuccess({ data: { asset: testValue } });
       expect(setSelection).toHaveBeenCalledWith(camelizeKeys(testValue));
+    });
+    test('onSuccess: refreshes audio assets after an audio upload', () => {
+      const { fetchAudios } = thunkActions;
+      thunkActions.fetchAudios = jest.fn(() => 'fetchAudios');
+      thunkActions.uploadAsset({
+        file: testValue,
+        setSelection,
+        assetType: 'audio',
+        searchString: 'lecture',
+      })(dispatch, getState);
+      [[dispatchedAction]] = dispatch.mock.calls;
+      dispatchedAction.uploadAsset.onSuccess({ data: { asset: testValue } });
+      expect(dispatch).toHaveBeenCalledWith('fetchAudios');
+      expect(thunkActions.fetchAudios).toHaveBeenCalledWith({ pageNumber: 0, searchString: 'lecture' });
+      thunkActions.fetchAudios = fetchAudios;
     });
     test('should save a new image temporary when is create workflow', () => {
       getState.mockImplementation(() => ({ app: { blockId: '', blockType: 'html' } }));

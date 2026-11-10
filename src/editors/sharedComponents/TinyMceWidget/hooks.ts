@@ -20,6 +20,8 @@ export const state = StrictDict({
   // eslint-disable-next-line react-hooks/rules-of-hooks
   isImageModalOpen: (val) => useState(val),
   // eslint-disable-next-line react-hooks/rules-of-hooks
+  isAudioModalOpen: (val) => useState(val),
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   isSourceCodeModalOpen: (val) => useState(val),
   // eslint-disable-next-line react-hooks/rules-of-hooks
   imageSelection: (val) => useState(val),
@@ -277,6 +279,7 @@ export const openModalWithSelectedImage = ({
 export const setupCustomBehavior = ({
   updateContent,
   openImgModal,
+  openAudioModal,
   openSourceCodeModal,
   editorType,
   images,
@@ -289,6 +292,12 @@ export const setupCustomBehavior = ({
     icon: 'image',
     tooltip: 'Add Image',
     onAction: openImgModal,
+  });
+  editor.ui.registry.addIcon('audio', tinyMCE.audioIcon);
+  editor.ui.registry.addButton(tinyMCE.buttons.audioUploadButton, {
+    icon: 'audio',
+    tooltip: 'Add Audio',
+    onAction: openAudioModal,
   });
   // editing an existing image
   editor.ui.registry.addButton(tinyMCE.buttons.editImageSettings, {
@@ -392,6 +401,7 @@ export const editorConfig = ({
   placeholder,
   initializeEditor,
   openImgModal,
+  openAudioModal,
   openSourceCodeModal,
   setSelection,
   updateContent,
@@ -400,6 +410,7 @@ export const editorConfig = ({
   maxHeight,
   learningContextId,
   staticRootUrl,
+  enableAudioUpload,
   enableImageUpload,
 }) => {
   const lmsEndpointUrl = getConfig().LMS_BASE_URL;
@@ -413,7 +424,9 @@ export const editorConfig = ({
     imageToolbar,
     quickbarsInsertToolbar,
     quickbarsSelectionToolbar,
-  } = pluginConfig({ placeholder, editorType, enableImageUpload });
+  } = pluginConfig({
+    placeholder, editorType, enableAudioUpload, enableImageUpload,
+  });
   const isLocaleRtl = isRtl(getLocale());
   return {
     onInit: (_evt, editor) => {
@@ -440,6 +453,7 @@ export const editorConfig = ({
         editorType,
         updateContent,
         openImgModal,
+        openAudioModal,
         openSourceCodeModal,
         lmsEndpointUrl,
         setImage: setSelection,
@@ -483,6 +497,15 @@ export const imgModalToggle = () => {
     isImgOpen,
     openImgModal: () => setIsOpen(true),
     closeImgModal: () => setIsOpen(false),
+  };
+};
+
+export const audioModalToggle = () => {
+  const [isAudioOpen, setIsOpen] = state.isAudioModalOpen(false);
+  return {
+    isAudioOpen,
+    openAudioModal: () => setIsOpen(true),
+    closeAudioModal: () => setIsOpen(false),
   };
 };
 

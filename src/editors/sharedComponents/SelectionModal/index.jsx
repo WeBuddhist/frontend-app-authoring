@@ -35,6 +35,7 @@ const SelectionModal = ({
   isFetchError,
   isUploadError,
   isLibrary,
+  notice,
 }) => {
   const intl = useIntl();
   const {
@@ -97,6 +98,7 @@ const SelectionModal = ({
         as if there was content to scroll to, so make the min-height 1px.
       */}
       <Stack gap={2} style={{ minHeight: '1px' }}>
+        {notice}
         {/* Error Alerts */}
         <FetchErrorAlert isFetchError={isFetchError} message={fetchError} />
         <UploadErrorAlert isUploadError={isUploadError} message={uploadError} />
@@ -126,6 +128,7 @@ const SelectionModal = ({
 SelectionModal.defaultProps = {
   size: 'lg',
   isFullscreenScroll: true,
+  notice: null,
 };
 
 SelectionModal.propTypes = {
@@ -163,6 +166,7 @@ SelectionModal.propTypes = {
   isFetchError: PropTypes.bool.isRequired,
   isUploadError: PropTypes.bool.isRequired,
   isLibrary: PropTypes.bool,
+  notice: PropTypes.node,
 };
 
 export default SelectionModal;

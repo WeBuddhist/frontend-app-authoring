@@ -80,6 +80,16 @@ describe('app reducer', () => {
         });
       });
     });
+    describe('setAudios', () => {
+      it('sets audios and their count', () => {
+        const audioData = { audios: { id1: { id: 'id1' } }, audioCount: 1 };
+        expect(reducer(testingState, actions.setAudios(audioData))).toEqual({
+          ...testingState,
+          audios: audioData.audios,
+          audioCount: audioData.audioCount,
+        });
+      });
+    });
     describe('initializeEditor', () => {
       it('sets editorInitialized to true', () => {
         expect(reducer(testingState, actions.initializeEditor())).toEqual({

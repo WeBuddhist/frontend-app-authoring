@@ -131,6 +131,15 @@ export const apiMethods = {
       { params },
     );
   },
+  fetchCourseAudios: ({
+    learningContextId,
+    studioEndpointUrl,
+    pageNumber,
+    searchString = '',
+  }): Promise<{ data: AssetResponse & Pagination }> => get(
+    urls.courseAssets({ studioEndpointUrl, learningContextId }),
+    { params: { asset_type: 'Audio', page: pageNumber, text_search: searchString } },
+  ),
   fetchLibraryImages: ({ blockId }) => get(
     `${urls.libraryAssets({ blockId })}`,
   ),

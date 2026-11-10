@@ -86,6 +86,18 @@ export interface EditorState {
     studioEndpointUrl: string | null;
     /** e.g. "http://local.openedx.io:8000" TODO: move to EditorContext */
     lmsEndpointUrl: string | null;
+    audios: Record<string, {
+      id: string;
+      displayName: string;
+      contentType: string;
+      dateAdded: number;
+      url: string;
+      externalUrl: string;
+      portableUrl: string;
+      locked: boolean;
+      file?: File;
+    }>;
+    audioCount: number;
     images: Record<string, {
       id: string;
       displayName: string; // e.g. "nHLVaDX6mro-unsplash.jpg"

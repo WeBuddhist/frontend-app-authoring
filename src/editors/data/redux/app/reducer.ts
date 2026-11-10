@@ -16,6 +16,8 @@ const initialState: EditorState['app'] = {
   editorInitialized: false,
   studioEndpointUrl: null,
   lmsEndpointUrl: null,
+  audios: {},
+  audioCount: 0,
   images: {},
   imageCount: 0,
   videos: {},
@@ -49,6 +51,11 @@ const app = createSlice({
     setBlockTitle: (state, { payload }) => ({ ...state, blockTitle: payload }),
     setSaveResponse: (state, { payload }) => ({ ...state, saveResponse: payload }),
     initializeEditor: (state) => ({ ...state, editorInitialized: true }),
+    setAudios: (state, { payload }) => ({
+      ...state,
+      audios: { ...state.audios, ...payload.audios },
+      audioCount: payload.audioCount,
+    }),
     setImages: (state, { payload }) => ({
       ...state,
       images: { ...state.images, ...payload.images },

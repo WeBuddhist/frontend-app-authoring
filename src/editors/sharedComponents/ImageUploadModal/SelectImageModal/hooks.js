@@ -23,13 +23,19 @@ export const state = {
   showSizeError: (val) => React.useState(val),
 };
 
-export const searchAndSortHooks = () => {
+export const searchAndSortHooks = ({ searchAssets } = {}) => {
   const [searchString, setSearchString] = module.state.searchString('');
   const [sortBy, setSortBy] = module.state.sortBy(sortKeys.dateNewest);
   return {
     searchString,
-    onSearchChange: (e) => setSearchString(e.target.value),
-    clearSearchString: () => setSearchString(''),
+    onSearchChange: (e) => {
+      setSearchString(e.target.value);
+      searchAssets?.(e.target.value);
+    },
+    clearSearchString: () => {
+      setSearchString('');
+      searchAssets?.('');
+    },
     sortBy,
     onSortClick: (key) => () => setSortBy(key),
     sortKeys,
@@ -52,6 +58,8 @@ export const imgListHooks = ({
   setSelection,
   images,
   imageCount,
+  fetchAssets = thunkActions.app.fetchImages,
+  feedbackMessages = messages,
 }) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const dispatch = useDispatch();
@@ -68,13 +76,13 @@ export const imgListHooks = ({
       show: showSelectImageError,
       set: () => setShowSelectImageError(true),
       dismiss: () => setShowSelectImageError(false),
-      message: messages.selectImageError,
+      message: feedbackMessages.selectImageError,
     },
     inputError: {
       show: showSizeError,
       set: () => setShowSizeError(true),
       dismiss: () => setShowSizeError(false),
-      message: messages.fileSizeError,
+      message: feedbackMessages.fileSizeError,
     },
     images,
     galleryProps: {
@@ -83,10 +91,14 @@ export const imgListHooks = ({
       displayList: list,
       highlighted,
       onHighlightChange: (e) => setHighlighted(e.target.value),
-      emptyGalleryLabel: messages.emptyGalleryLabel,
+      emptyGalleryLabel: feedbackMessages.emptyGalleryLabel,
       allowLazyLoad: true,
-      fetchNextPage: ({ pageNumber }) => dispatch(thunkActions.app.fetchImages({ pageNumber })),
+      fetchNextPage: ({ pageNumber }) => dispatch(fetchAssets({
+        pageNumber,
+        searchString: searchSortProps.searchString,
+      })),
       assetCount: imageCount,
+      paginationKey: searchSortProps.searchString,
     },
     // highlight by id
     selectBtnProps: {
@@ -116,7 +128,9 @@ export const checkValidFileSize = ({
   return true;
 };
 
-export const fileInputHooks = ({ setSelection, clearSelection, imgList }) => {
+export const fileInputHooks = ({
+  setSelection, clearSelection, imgList, assetType, searchString,
+}) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const dispatch = useDispatch();
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -135,6 +149,8 @@ export const fileInputHooks = ({ setSelection, clearSelection, imgList }) => {
         thunkActions.app.uploadAsset({
           file: selectedFile,
           setSelection,
+          assetType,
+          searchString,
         }),
       );
     }
@@ -152,18 +168,26 @@ export const imgHooks = ({
   clearSelection,
   images,
   imageCount,
+  assetType,
+  fetchAssets,
+  feedbackMessages,
+  searchAssets,
 }) => {
-  const searchSortProps = module.searchAndSortHooks();
+  const searchSortProps = module.searchAndSortHooks({ searchAssets });
   const imgList = module.imgListHooks({
     setSelection,
     searchSortProps,
     images,
     imageCount,
+    fetchAssets,
+    feedbackMessages,
   });
   const fileInput = module.fileInputHooks({
     setSelection,
     clearSelection,
     imgList,
+    assetType,
+    searchString: searchSortProps.searchString,
   });
   const {
     galleryError,

@@ -10,6 +10,7 @@ import 'tinymce/icons/default';
 import 'frontend-components-tinymce-advanced-plugins';
 
 import ImageUploadModal from '../ImageUploadModal';
+import AudioUploadModal from '../AudioUploadModal';
 import SourceCodeModal from '../SourceCodeModal';
 import * as hooks from './hooks';
 import './customTinyMcePlugins/embedIframePlugin';
@@ -42,6 +43,7 @@ const TinyMceWidget = ({
   id,
   editorContentHtml, // editorContent in html form
   learningContextId,
+  audios,
   images,
   enableImageUpload,
   isLibrary,
@@ -49,13 +51,25 @@ const TinyMceWidget = ({
   staticRootUrl,
   ...editorConfig
 }) => {
+  const enableAudioUpload = editorType === 'text' && !isLibraryV1Key(learningContextId);
   const { isImgOpen, openImgModal, closeImgModal } = hooks.imgModalToggle();
+  const { isAudioOpen, openAudioModal, closeAudioModal } = hooks.audioModalToggle();
   const { isSourceCodeOpen, openSourceCodeModal, closeSourceCodeModal } = hooks.sourceCodeModalToggle(editorRef);
   const { imagesRef } = hooks.useImages({ images, editorContentHtml });
   const imageSelection = hooks.selectedImage(null);
 
   return (
     <>
+      {enableAudioUpload && (
+        <AudioUploadModal
+          audios={audios}
+          close={closeAudioModal}
+          editorRef={editorRef}
+          isLibrary={isLibrary}
+          isOpen={isAudioOpen}
+          lmsEndpointUrl={getConfig().LMS_BASE_URL}
+        />
+      )}
       {enableImageUpload && (
         <ImageUploadModal
           isOpen={isImgOpen}
@@ -83,10 +97,12 @@ const TinyMceWidget = ({
           // @ts-ignore FIXME: this will have type errors until `editorConfig` gets proper type definitions.
           ...hooks.editorConfig({
             openImgModal,
+            openAudioModal,
             openSourceCodeModal,
             editorType,
             // @ts-ignore FIXME: 'editorRef' is not an accepted parameter of editorConfig()
             editorRef,
+            enableAudioUpload,
             enableImageUpload: isLibraryV1Key(learningContextId) ? false : enableImageUpload,
             learningContextId,
             images: imagesRef,
@@ -107,6 +123,7 @@ TinyMceWidget.defaultProps = {
   lmsEndpointUrl: '',
   studioEndpointUrl: '',
   images: null,
+  audios: {},
   id: null,
   disabled: false,
   editorContentHtml: undefined,
@@ -119,6 +136,7 @@ TinyMceWidget.propTypes = {
   editorType: PropTypes.string,
   isLibrary: PropTypes.bool,
   images: PropTypes.shape({}),
+  audios: PropTypes.shape({}),
   editorRef: PropTypes.shape({}),
   lmsEndpointUrl: PropTypes.string,
   studioEndpointUrl: PropTypes.string,

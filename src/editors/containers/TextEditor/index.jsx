@@ -30,6 +30,7 @@ const TextEditor = ({
   initializeEditor,
   blockFinished,
   learningContextId,
+  audios,
   images,
   isLibrary,
 }) => {
@@ -68,6 +69,7 @@ const TextEditor = ({
         initializeEditor={initializeEditor}
         {...{
           images,
+          audios,
           isLibrary,
           learningContextId,
           staticRootUrl,
@@ -121,6 +123,7 @@ TextEditor.propTypes = {
   blockFinished: PropTypes.bool,
   learningContextId: PropTypes.string, // This should be required but is NULL when the store is in initial state :/
   images: PropTypes.shape({}).isRequired,
+  audios: PropTypes.shape({}).isRequired,
   isLibrary: PropTypes.bool.isRequired,
 };
 
@@ -133,6 +136,7 @@ export const mapStateToProps = (state) => ({
   || selectors.requests.isFinished(state, { requestKey: RequestKeys.fetchBlock }),
   learningContextId: selectors.app.learningContextId(state),
   images: selectors.app.images(state),
+  audios: selectors.app.audios(state),
   isLibrary: selectors.app.isLibrary(state),
 });
 

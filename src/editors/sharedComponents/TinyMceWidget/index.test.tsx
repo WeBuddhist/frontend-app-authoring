@@ -20,6 +20,7 @@ jest.mock('@tinymce/tinymce-react', () => {
 });
 
 jest.mock('../ImageUploadModal', () => 'ImageUploadModal');
+jest.mock('../AudioUploadModal', () => 'AudioUploadModal');
 jest.mock('../SourceCodeModal', () => 'SourceCodeModal');
 
 jest.mock('./hooks', () => ({
@@ -28,6 +29,11 @@ jest.mock('./hooks', () => ({
     isImgOpen: true,
     openImgModal: jest.fn().mockName('openModal'),
     closeImgModal: jest.fn().mockName('closeModal'),
+  })),
+  audioModalToggle: jest.fn(() => ({
+    isAudioOpen: true,
+    openAudioModal: jest.fn().mockName('openAudioModal'),
+    closeAudioModal: jest.fn().mockName('closeAudioModal'),
   })),
   sourceCodeModalToggle: jest.fn(() => ({
     isSourceCodeOpen: true,
@@ -50,6 +56,7 @@ describe('TinyMceWidget', () => {
     editorRef: { current: { value: 'something' } },
     isLibrary: false,
     images: { sOmEaSsET: { staTICUrl: staticUrl } },
+    audios: {},
     lmsEndpointUrl: 'sOmEvaLue.cOm',
     studioEndpointUrl: 'sOmEoThERvaLue.cOm',
     disabled: false,
@@ -73,11 +80,17 @@ describe('TinyMceWidget', () => {
       openSourceCodeModal: jest.fn().mockName('modal.openModal'),
       closeSourceCodeModal: jest.fn().mockName('modal.closeModal'),
     });
+    jest.spyOn(hooks, 'audioModalToggle').mockReturnValue({
+      isAudioOpen: false,
+      openAudioModal: jest.fn().mockName('modal.openAudioModal'),
+      closeAudioModal: jest.fn().mockName('modal.closeAudioModal'),
+    });
 
     test('renders as expected with default behavior', () => {
       const { container } = editorRender(<TinyMceWidget {...props} />);
       expect(screen.getByText('TiNYmCE EDitOR')).toBeInTheDocument();
       expect(container.querySelector('sourcecodemodal')).toBeInTheDocument();
+      expect(container.querySelector('audiouploadmodal')).toBeInTheDocument();
       expect(container.querySelector('imageuploadmodal')).toBeInTheDocument();
     });
 
@@ -85,6 +98,7 @@ describe('TinyMceWidget', () => {
       const { container } = editorRender(<TinyMceWidget {...props} editorType="problem" />);
       expect(container.querySelector('imageuploadmodal')).toBeInTheDocument();
       expect(container.querySelector('sourcecodemodal')).not.toBeInTheDocument();
+      expect(container.querySelector('audiouploadmodal')).not.toBeInTheDocument();
     });
 
     test('ImageUploadModal is not rendered', () => {

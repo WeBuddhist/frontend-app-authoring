@@ -24,6 +24,7 @@ jest.mock('../../data/redux', () => ({
       studioEndpointUrl: jest.fn(state => ({ studioEndpointUrl: state })),
       showRawEditor: jest.fn(state => ({ showRawEditor: state })),
       images: jest.fn(state => ({ images: state })),
+      audios: jest.fn(state => ({ audios: state })),
       isLibrary: jest.fn(state => ({ isLibrary: state })),
       blockId: jest.fn(state => ({ blockId: state })),
       learningContextId: jest.fn(state => ({ learningContextId: state })),
@@ -51,6 +52,7 @@ describe('TextEditor', () => {
     blockFinished: true,
     learningContextId: 'course+org+run',
     images: {},
+    audios: {},
     isLibrary: false,
   };
 
@@ -120,6 +122,9 @@ describe('TextEditor', () => {
       expect(
         mapStateToProps(testState).images,
       ).toEqual(selectors.app.images(testState));
+    });
+    test('audios from app.audios', () => {
+      expect(mapStateToProps(testState).audios).toEqual(selectors.app.audios(testState));
     });
   });
 

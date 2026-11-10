@@ -16,6 +16,7 @@ import * as module from './requests';
 import { isLibraryKey } from '../../../../generic/key-utils';
 import { createLibraryBlock } from '../../../../library-authoring/data/api';
 import { acceptedImgKeys } from '../../../sharedComponents/ImageUploadModal/SelectImageModal/utils';
+import { acceptedAudioKeys } from '../../../sharedComponents/AudioUploadModal/utils';
 import { blockTypes } from '../../constants/app';
 import { problemTitles } from '../../constants/problem';
 
@@ -161,22 +162,20 @@ export const createBlock = ({ ...rest }) => (dispatch, getState) => {
 
 // exportend only for test
 export const removeTemporalLink = (response, asset, content, resolve) => {
-  const imagePath = `/${response.data.asset.portableUrl}`;
-  const reader = new FileReader();
-  reader.addEventListener('load', () => {
-    const imageBS64 = reader.result.toString();
-    const parsedContent = typeof content === 'string' ? content.replace(imageBS64, imagePath) : { ...content, olx: content.olx.replace(imageBS64, imagePath) };
-    URL.revokeObjectURL(asset);
-    resolve(parsedContent);
-  });
-  reader.readAsDataURL(asset);
+  const assetPath = `/${response.data.asset.portableUrl}`;
+  const replaceTemporaryUrl = value => value.replaceAll(asset.externalUrl, assetPath);
+  const parsedContent = typeof content === 'string'
+    ? replaceTemporaryUrl(content)
+    : { ...content, olx: replaceTemporaryUrl(content.olx) };
+  URL.revokeObjectURL(asset.externalUrl);
+  resolve(parsedContent);
 };
 
 export const batchUploadAssets = ({ assets, content, ...rest }) => (dispatch) => {
   const promises = assets.reduce((promiseChain, asset) => promiseChain
     .then((parsedContent) => new Promise((resolve) => {
       dispatch(module.uploadAsset({
-        asset,
+        asset: asset.file,
         onSuccess: (response) => removeTemporalLink(response, asset, parsedContent, resolve),
       }));
     })), Promise.resolve(content));
@@ -242,6 +241,28 @@ export const fetchImages = ({ pageNumber, ...rest }) => (dispatch, getState) => 
       .then(({ data }) => ({ images: loadImages(data.assets), imageCount: data.totalCount })),
     ...rest,
   }));
+};
+
+export const fetchAudios = ({ pageNumber, searchString = '', ...rest }) => (dispatch, getState) => {
+  const learningContextId = selectors.app.learningContextId(getState());
+  const requestKey = RequestKeys.fetchAudios;
+  let promise;
+  if (isLibraryKey(learningContextId)) {
+    promise = api.fetchLibraryImages({
+      blockId: selectors.app.blockId(getState()),
+    }).then(({ data }) => {
+      const audios = getLibraryImageAssets(data.files, Object.keys(acceptedAudioKeys));
+      return { audios, audioCount: Object.keys(audios).length };
+    });
+  } else {
+    promise = api.fetchCourseAudios({
+      pageNumber,
+      searchString,
+      studioEndpointUrl: selectors.app.studioEndpointUrl(getState()),
+      learningContextId,
+    }).then(({ data }) => ({ audios: loadImages(data.assets), audioCount: data.totalCount }));
+  }
+  dispatch(module.networkRequest({ requestKey, promise, ...rest }));
 };
 
 export const fetchVideos = ({ ...rest }) => (dispatch, getState) => {
@@ -492,6 +513,7 @@ export default StrictDict({
   createBlock,
   saveBlock,
   fetchImages,
+  fetchAudios,
   fetchVideos,
   uploadAsset,
   allowThumbnailUpload,

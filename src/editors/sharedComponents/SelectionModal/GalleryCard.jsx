@@ -17,6 +17,7 @@ import LanguageNamesWidget from '../../containers/VideoEditor/components/VideoSe
 const GalleryCard = ({
   asset,
   thumbnailFallback,
+  alwaysShowThumbnailFallback,
 }) => {
   const [thumbnailError, setThumbnailError] = React.useState(false);
   return (
@@ -30,7 +31,7 @@ const GalleryCard = ({
         <div
           className="row justify-content-center align-itmes-center p-2"
         >
-          {(thumbnailError && thumbnailFallback) ? (
+          {((alwaysShowThumbnailFallback || thumbnailError) && thumbnailFallback) ? (
             <div style={{ width: '200px', height: '100px' }}>
               { thumbnailFallback }
             </div>
@@ -90,6 +91,7 @@ const GalleryCard = ({
 
 GalleryCard.defaultProps = {
   thumbnailFallback: undefined,
+  alwaysShowThumbnailFallback: false,
 };
 GalleryCard.propTypes = {
   asset: PropTypes.shape({
@@ -109,6 +111,7 @@ GalleryCard.propTypes = {
     transcripts: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
   thumbnailFallback: PropTypes.element,
+  alwaysShowThumbnailFallback: PropTypes.bool,
 };
 
 export default GalleryCard;

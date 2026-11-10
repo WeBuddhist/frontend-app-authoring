@@ -23,6 +23,7 @@ export const simpleSelectors = {
   studioEndpointUrl: mkSimpleSelector(app => app.studioEndpointUrl),
   unitUrl: mkSimpleSelector(app => app.unitUrl),
   blockTitle: mkSimpleSelector(app => app.blockTitle),
+  audios: mkSimpleSelector(app => app.audios),
   images: mkSimpleSelector(app => app.images),
   videos: mkSimpleSelector(app => app.videos),
   showRawEditor: mkSimpleSelector(app => app.showRawEditor),
