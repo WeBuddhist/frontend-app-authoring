@@ -12,8 +12,9 @@ The slot is the list inside the "Create with a tool" menu on the empty Course Ou
 course has no sections). Each item is a tool that builds the course outline for the author.
 
 By default the slot contains the "AI assistant" item, which opens the AI course-creator chatbot. That item only shows
-when the AI course creator is enabled. If the AI course creator is disabled and no plugin is inserted into this slot,
-the "Create with a tool" button is not shown at all.
+when the AI course creator is enabled. The outline's own "New section" buttons come below the menu, under "or build it
+yourself". If the AI course creator is disabled and no plugin is inserted into this slot, the "Create with a tool"
+button is not shown at all, and the empty outline looks as it does in Open edX.
 
 Use the exported `CreateToolMenuItem` component so that inserted tools look like the default one:
 

@@ -14,7 +14,9 @@ const renderSlot = (props = {}) => render(
     isAiEnabled
     onOpenAiAssistant={jest.fn()}
     {...props}
-  />,
+  >
+    <button type="button">New section</button>
+  </CourseOutlineCreateToolsSlot>,
 );
 
 describe('CourseOutlineCreateToolsSlot', () => {
@@ -31,12 +33,17 @@ describe('CourseOutlineCreateToolsSlot', () => {
     fireEvent.click(screen.getByText('AI assistant'));
 
     expect(onOpenAiAssistant).toHaveBeenCalled();
+    // The outline's own buttons come below, as the way to build it yourself.
+    expect(screen.getByText(messages.manualLabel.defaultMessage)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'New section' })).toBeInTheDocument();
   });
 
-  test('shows nothing when the AI assistant is off and no tool is plugged in', () => {
+  test('shows only the outline\'s own buttons when the AI assistant is off and no tool is plugged in', () => {
     renderSlot({ isAiEnabled: false });
 
     expect(screen.queryByRole('button', { name: messages.toggleLabel.defaultMessage })).not.toBeInTheDocument();
+    expect(screen.queryByText(messages.manualLabel.defaultMessage)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'New section' })).toBeInTheDocument();
   });
 
   test('shows plugged-in tools with the course ID', () => {

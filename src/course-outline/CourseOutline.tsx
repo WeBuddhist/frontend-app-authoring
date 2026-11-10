@@ -545,29 +545,21 @@ const CourseOutline = ({ courseId }: CourseOutlineProps) => {
                           </>
                         ) : (
                           <EmptyPlaceholder>
-                            <>
-                              {courseActions.childAddable && (
-                                <CourseOutlineCreateToolsSlot
-                                  courseId={courseId}
-                                  isAiEnabled={isAiEnabled}
-                                  onOpenAiAssistant={() => setIsAiModalOpen(true)}
+                            {courseActions.childAddable && (
+                              <CourseOutlineCreateToolsSlot
+                                courseId={courseId}
+                                isAiEnabled={isAiEnabled}
+                                onOpenAiAssistant={() => setIsAiModalOpen(true)}
+                              >
+                                <OutlineAddChildButtons
+                                  handleNewButtonClick={handleNewSectionSubmit}
+                                  handleUseFromLibraryClick={openAddLibrarySectionModal}
+                                  childType={ContainerType.Section}
+                                  btnVariant="primary"
+                                  btnClasses="mt-1"
                                 />
-                              )}
-                              {courseActions.childAddable && (
-                                <div className="outline-empty-placeholder__manual">
-                                  <p className="outline-empty-placeholder__manual-label">
-                                    {intl.formatMessage(messages.emptyPlaceholderManualLabel)}
-                                  </p>
-                                  <OutlineAddChildButtons
-                                    handleNewButtonClick={handleNewSectionSubmit}
-                                    handleUseFromLibraryClick={openAddLibrarySectionModal}
-                                    childType={ContainerType.Section}
-                                    btnVariant="outline-primary"
-                                    btnClasses="mt-2"
-                                  />
-                                </div>
-                              )}
-                            </>
+                              </CourseOutlineCreateToolsSlot>
+                            )}
                           </EmptyPlaceholder>
                         )}
                       </div>
