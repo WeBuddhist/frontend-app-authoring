@@ -1,15 +1,15 @@
 import { defineMessages } from '@edx/frontend-platform/i18n';
 
 const messages = defineMessages({
-  launchButton: {
-    id: 'course-authoring.ai-course-creator.launch.button',
-    defaultMessage: 'Create with AI assistant',
-    description: 'Button on the empty course outline that opens the AI course-creator chatbot',
+  menuItemTitle: {
+    id: 'course-authoring.ai-course-creator.menu-item.title',
+    defaultMessage: 'AI assistant',
+    description: 'Item in the "Create with a tool" menu of the empty course outline that opens the AI course-creator chatbot',
   },
-  launchButtonDescription: {
-    id: 'course-authoring.ai-course-creator.launch.description',
-    defaultMessage: 'Let SherabAI interview you and build your course outline automatically.',
-    description: 'Helper text under the AI assistant launch button',
+  menuItemDescription: {
+    id: 'course-authoring.ai-course-creator.menu-item.description',
+    defaultMessage: 'SherabAI interviews you and builds your course outline.',
+    description: 'Helper text under the AI assistant item in the "Create with a tool" menu',
   },
   modalTitle: {
     id: 'course-authoring.ai-course-creator.modal.title',
