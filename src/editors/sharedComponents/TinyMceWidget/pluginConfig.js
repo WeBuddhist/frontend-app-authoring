@@ -3,13 +3,16 @@ import { buttons, plugins } from '../../data/constants/tinyMCE';
 
 const mapToolbars = toolbars => toolbars.map(toolbar => toolbar.join(' ')).join(' | ');
 
-const pluginConfig = ({ placeholder, editorType, enableImageUpload }) => {
+const pluginConfig = ({
+  placeholder, editorType, enableImageUpload, enableAudioUpload,
+}) => {
   const image = enableImageUpload ? plugins.image : '';
   const imageTools = enableImageUpload ? plugins.imagetools : '';
   const imageUploadButton = enableImageUpload ? buttons.imageUploadButton : '';
   const editImageSettings = enableImageUpload ? buttons.editImageSettings : '';
   const codePlugin = editorType === 'text' ? plugins.code : '';
   const codeButton = editorType === 'text' ? buttons.code : '';
+  const audioUploadButton = enableAudioUpload ? buttons.audioUploadButton : '';
   const labelButton = editorType === 'question' ? buttons.customLabelButton : '';
   const quickToolbar = editorType === 'expandable' ? plugins.quickbars : '';
   const statusbar = editorType !== 'expandable';
@@ -55,7 +58,8 @@ const pluginConfig = ({ placeholder, editorType, enableImageUpload }) => {
           buttons.outdent,
           buttons.indent,
         ],
-        [imageUploadButton, buttons.link, buttons.unlink, buttons.blockQuote, buttons.codeBlock],
+        [imageUploadButton, audioUploadButton],
+        [buttons.link, buttons.unlink, buttons.blockQuote, buttons.codeBlock],
         [buttons.table, buttons.emoticons, buttons.charmap, buttons.hr],
         [buttons.removeFormat, codeButton, buttons.a11ycheck, buttons.embediframe],
       ]) : false,

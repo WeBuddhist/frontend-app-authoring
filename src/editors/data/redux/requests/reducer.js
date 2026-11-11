@@ -16,6 +16,7 @@ const initialState = {
   [RequestKeys.uploadTranscript]: { status: RequestStates.inactive },
   [RequestKeys.deleteTranscript]: { status: RequestStates.inactive },
   [RequestKeys.fetchCourseDetails]: { status: RequestStates.inactive },
+  [RequestKeys.fetchAudios]: { status: RequestStates.inactive },
   [RequestKeys.fetchImages]: { status: RequestStates.inactive },
   [RequestKeys.fetchVideos]: { status: RequestStates.inactive },
   [RequestKeys.uploadVideo]: { status: RequestStates.inactive },

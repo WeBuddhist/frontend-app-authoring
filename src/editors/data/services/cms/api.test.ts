@@ -122,6 +122,17 @@ describe('cms api', () => {
         );
       });
     });
+    describe('fetchCourseAudios', () => {
+      it('filters course assets to audio', async () => {
+        await apiMethods.fetchCourseAudios({
+          learningContextId, studioEndpointUrl, pageNumber: 2, searchString: 'lecture',
+        });
+        expect(get).toHaveBeenCalledWith(
+          urls.courseAssets({ studioEndpointUrl, learningContextId }),
+          { params: { asset_type: 'Audio', page: 2, text_search: 'lecture' } },
+        );
+      });
+    });
     describe('fetchLibraryImages', () => {
       it('should call get with urls.libraryAssets for library V2', async () => {
         await apiMethods.fetchLibraryImages({

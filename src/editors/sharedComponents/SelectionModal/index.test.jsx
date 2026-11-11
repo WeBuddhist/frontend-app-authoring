@@ -147,6 +147,14 @@ describe('Selection Modal', () => {
       }),
     );
   });
+  test('renders an optional authoring notice', () => {
+    render(
+      <IntlProvider locale="en">
+        <SelectionModal {...props} notice={<div>Provide a transcript</div>} />
+      </IntlProvider>,
+    );
+    expect(screen.getByText('Provide a transcript')).toBeInTheDocument();
+  });
   test('rendering correctly with errors', () => {
     render(
       <IntlProvider locale="en">

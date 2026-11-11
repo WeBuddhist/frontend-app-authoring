@@ -25,9 +25,11 @@ const Gallery = ({
   isLoaded,
   isLibrary,
   thumbnailFallback,
+  alwaysShowThumbnailFallback,
   allowLazyLoad,
   fetchNextPage,
   assetCount,
+  paginationKey,
 }) => {
   const intl = useIntl();
 
@@ -77,11 +79,13 @@ const Gallery = ({
             asset={asset}
             showId={showIdsOnCards}
             thumbnailFallback={thumbnailFallback}
+            alwaysShowThumbnailFallback={alwaysShowThumbnailFallback}
           />
         )) }
       </SelectableBox.Set>
       {(allowLazyLoad && !isLibrary) && (
         <GalleryLoadMoreButton
+          key={paginationKey}
           {...{
             fetchNextPage,
             assetCount,
@@ -100,9 +104,11 @@ Gallery.defaultProps = {
   height: '375px',
   show: true,
   thumbnailFallback: undefined,
+  alwaysShowThumbnailFallback: false,
   allowLazyLoad: false,
   fetchNextPage: null,
   assetCount: 0,
+  paginationKey: '',
 };
 Gallery.propTypes = {
   show: PropTypes.bool, // eslint-disable-line react/no-unused-prop-types
@@ -117,9 +123,11 @@ Gallery.propTypes = {
   showIdsOnCards: PropTypes.bool,
   height: PropTypes.string,
   thumbnailFallback: PropTypes.element,
+  alwaysShowThumbnailFallback: PropTypes.bool,
   allowLazyLoad: PropTypes.bool,
   fetchNextPage: PropTypes.func,
   assetCount: PropTypes.number,
+  paginationKey: PropTypes.string,
 };
 
 export default Gallery;

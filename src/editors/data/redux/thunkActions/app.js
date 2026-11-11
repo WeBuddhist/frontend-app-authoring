@@ -59,6 +59,18 @@ export const fetchImages = ({ pageNumber }) => (dispatch) => {
   }));
 };
 
+export const fetchAudios = ({ pageNumber, searchString = '' }) => (dispatch) => {
+  dispatch(requests.fetchAudios({
+    pageNumber,
+    searchString,
+    onSuccess: ({ audios, audioCount }) => dispatch(actions.app.setAudios({ audios, audioCount })),
+    onFailure: (error) => dispatch(actions.requests.failRequest({
+      requestKey: RequestKeys.fetchAudios,
+      error,
+    })),
+  }));
+};
+
 export const fetchVideos = () => (dispatch) => {
   dispatch(requests.fetchVideos({
     onSuccess: (response) => dispatch(actions.app.setVideos(response.data.videos)),
@@ -110,6 +122,7 @@ export const initialize = (data) => (dispatch) => {
       break;
     case 'html':
       dispatch(module.fetchImages({ pageNumber: 0 }));
+      dispatch(module.fetchAudios({ pageNumber: 0 }));
       break;
     default:
       break;
@@ -147,14 +160,16 @@ export const createBlock = (content, returnToUnit) => (dispatch, getState) => {
   dispatch(requests.createBlock({
     onSuccess: (response) => {
       dispatch(actions.app.setBlockId(response.id));
-      const newImages = Object.values(selectors.images(getState())).map((image) => image.file);
+      const newImages = Object.values(selectors.images(getState()));
+      const newAudios = Object.values(selectors.audios(getState()));
+      const newAssets = [...newImages, ...newAudios];
 
-      if (newImages.length === 0) {
+      if (newAssets.length === 0) {
         dispatch(saveBlock(content, returnToUnit));
         return;
       }
       dispatch(requests.batchUploadAssets({
-        assets: newImages,
+        assets: newAssets,
         content,
         onSuccess: (updatedContent) => dispatch(saveBlock(updatedContent, returnToUnit)),
         onFailure: (error) => dispatch(actions.requests.failRequest({
@@ -170,10 +185,12 @@ export const createBlock = (content, returnToUnit) => (dispatch, getState) => {
   }));
 };
 
-export const uploadAsset = ({ file, setSelection }) => (dispatch, getState) => {
+export const uploadAsset = ({
+  file, setSelection, assetType = 'image', searchString = '',
+}) => (dispatch, getState) => {
   if (selectors.shouldCreateBlock(getState())) {
     const tempFileURL = URL.createObjectURL(file);
-    const tempImage = {
+    const tempAsset = {
       displayName: file.name,
       url: tempFileURL,
       externalUrl: tempFileURL,
@@ -183,14 +200,23 @@ export const uploadAsset = ({ file, setSelection }) => (dispatch, getState) => {
       locked: false,
       file,
     };
-    setSelection(tempImage);
-    dispatch(appActions.setImages({ images: { [file.name]: tempImage }, imageCount: 1 }));
+    setSelection(tempAsset);
+    if (assetType === 'audio') {
+      dispatch(appActions.setAudios({ audios: { [file.name]: tempAsset }, audioCount: 1 }));
+    } else {
+      dispatch(appActions.setImages({ images: { [file.name]: tempAsset }, imageCount: 1 }));
+    }
     return;
   }
 
   dispatch(requests.uploadAsset({
     asset: file,
-    onSuccess: (response) => setSelection(camelizeKeys(response.data.asset)),
+    onSuccess: (response) => {
+      setSelection(camelizeKeys(response.data.asset));
+      if (assetType === 'audio') {
+        dispatch(module.fetchAudios({ pageNumber: 0, searchString }));
+      }
+    },
   }));
 };
 
@@ -203,6 +229,7 @@ export default StrictDict({
   initialize,
   saveBlock,
   fetchImages,
+  fetchAudios,
   uploadAsset,
   createBlock,
 });

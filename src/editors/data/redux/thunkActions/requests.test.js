@@ -34,6 +34,7 @@ jest.mock('../../services/cms/api', () => ({
   fetchCourseDetails: (args) => args,
   saveBlock: (args) => args,
   fetchCourseImages: ({ id, url }) => ({ id, url }),
+  fetchCourseAudios: ({ id, url }) => ({ id, url }),
   fetchLibraryImages: ({ id, url }) => ({ id, url }),
   fetchVideos: ({ id, url }) => ({ id, url }),
   uploadAsset: (args) => args,
@@ -319,6 +320,41 @@ describe('requests thunkActions module', () => {
         });
       });
     });
+    describe('fetchAudios', () => {
+      it('fetches a searched page of course audio assets', () => {
+        const fetchAudios = jest.spyOn(api, apiKeys.fetchCourseAudios).mockResolvedValueOnce({
+          data: { assets: [], totalCount: 0 },
+        });
+        jest.spyOn(api, apiKeys.loadImages).mockReturnValueOnce({});
+
+        requests.fetchAudios({
+          pageNumber: 2,
+          searchString: 'lecture',
+          ...fetchParams,
+        })(dispatch, () => testState);
+
+        expect(fetchAudios).toHaveBeenCalledWith({
+          pageNumber: 2,
+          searchString: 'lecture',
+          studioEndpointUrl: selectors.app.studioEndpointUrl(testState),
+          learningContextId: selectors.app.learningContextId(testState),
+        });
+      });
+
+      it('fetches and filters library audio assets', () => {
+        jest.spyOn(selectors.app, 'learningContextId').mockImplementationOnce(() => 'lib:demo');
+        const fetchAudios = jest.spyOn(api, apiKeys.fetchLibraryImages).mockResolvedValueOnce({
+          data: { files: [] },
+        });
+
+        requests.fetchAudios({ pageNumber: 0, ...fetchParams })(dispatch, () => testState);
+
+        expect(fetchAudios).toHaveBeenCalledWith({
+          blockId: selectors.app.blockId(testState),
+        });
+        expect(getLibraryImageAssets).toHaveBeenCalled();
+      });
+    });
     describe('fetchVideos', () => {
       const expectedArgs = {
         studioEndpointUrl: selectors.app.studioEndpointUrl(testState),
@@ -440,7 +476,10 @@ describe('requests thunkActions module', () => {
     });
 
     describe('batchUploadAssets', () => {
-      const assets = [new Blob(['file1']), new Blob(['file2'])];
+      const assets = [
+        { file: new Blob(['file1']), externalUrl: 'blob:file1' },
+        { file: new Blob(['file2']), externalUrl: 'blob:file2' },
+      ];
       testNetworkRequestAction({
         action: requests.batchUploadAssets,
         args: { ...fetchParams, assets },
@@ -449,7 +488,7 @@ describe('requests thunkActions module', () => {
           ...fetchParams,
           requestKey: RequestKeys.batchUploadAssets,
           promise: assets.reduce((acc, asset) => acc.then(() => requests.uploadAsset({
-            asset,
+            asset: asset.file,
             learningContextId: selectors.app.learningContextId(testState),
             studioEndpointUrl: selectors.app.studioEndpointUrl(testState),
           })), Promise.resolve()),
@@ -469,45 +508,23 @@ describe('requests thunkActions module', () => {
             },
           };
 
-          asset = new Blob(['image data'], { type: 'image/jpeg' });
-          content = 'Content with an image: data:image/jpeg;base64,TESTBASE64';
+          asset = {
+            file: new Blob(['audio data'], { type: 'audio/mpeg' }),
+            externalUrl: 'blob:temporary-audio',
+          };
+          content = '<audio src="blob:temporary-audio"></audio><a href="blob:temporary-audio">Download</a>';
         });
 
-        it('should replace the base64 image with the image path in the content', (done) => {
-          /*       const onLoad = jest.fn();
-          const readAsDataURLMock = jest.fn(() => {
-            this.result = 'data:image/jpeg;base64,TESTBASE64';
-            onLoad();
-          }); */
-          class FileReaderMock {
-            constructor() {
-              this.result = '';
-              this.onload = null;
-            }
-
-            addEventListener(event, callback) {
-              if (event === 'load') {
-                this.onLoad = callback;
-              }
-            }
-
-            readAsDataURL() {
-              this.result = 'data:image/jpeg;base64,TESTBASE64';
-              this.onLoad();
-            }
-          }
-          global.FileReader = FileReaderMock;
+        it('replaces every temporary asset URL with the uploaded path', () => {
           global.URL.revokeObjectURL = jest.fn();
-          const resolveMock = jest.fn((parsedContent) => {
-            // Assert that the content has been replaced correctly
-            expect(parsedContent).toEqual('Content with an image: /image/test.jpg');
-            done();
-          });
+          const resolveMock = jest.fn();
 
           requests.removeTemporalLink(response, asset, content, resolveMock);
 
-          // expect(global.FileReader.readAsDataURLMock).toHaveBeenCalledWith(asset);
-          expect(global.URL.revokeObjectURL).toHaveBeenCalledWith(asset);
+          expect(resolveMock).toHaveBeenCalledWith(
+            '<audio src="/image/test.jpg"></audio><a href="/image/test.jpg">Download</a>',
+          );
+          expect(global.URL.revokeObjectURL).toHaveBeenCalledWith(asset.externalUrl);
         });
       });
     });

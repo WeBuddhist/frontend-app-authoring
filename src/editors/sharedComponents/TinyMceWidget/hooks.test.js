@@ -80,6 +80,7 @@ describe('TinyMceEditor hooks', () => {
   });
   describe('state hooks', () => {
     state.testGetter(state.keys.isImageModalOpen);
+    state.testGetter(state.keys.isAudioModalOpen);
     state.testGetter(state.keys.isSourceCodeModalOpen);
     state.testGetter(state.keys.imageSelection);
   });
@@ -122,6 +123,7 @@ describe('TinyMceEditor hooks', () => {
         const addIcon = jest.fn();
         const addToggleButton = jest.fn();
         const openImgModal = jest.fn();
+        const openAudioModal = jest.fn();
         const openSourceCodeModal = jest.fn();
         const setImage = jest.fn();
         const updateContent = jest.fn();
@@ -143,13 +145,18 @@ describe('TinyMceEditor hooks', () => {
           editorType,
           updateContent,
           openImgModal,
+          openAudioModal,
           openSourceCodeModal,
           setImage,
           lmsEndpointUrl,
         })(editor);
-        expect(addIcon.mock.calls).toEqual([['textToSpeech', tinyMCE.textToSpeechIcon]]);
+        expect(addIcon.mock.calls).toEqual([
+          ['audio', tinyMCE.audioIcon],
+          ['textToSpeech', tinyMCE.textToSpeechIcon],
+        ]);
         expect(addButton.mock.calls).toEqual([
           [tinyMCE.buttons.imageUploadButton, { icon: 'image', tooltip: 'Add Image', onAction: openImgModal }],
+          [tinyMCE.buttons.audioUploadButton, { icon: 'audio', tooltip: 'Add Audio', onAction: openAudioModal }],
           [tinyMCE.buttons.editImageSettings, { icon: 'image', tooltip: 'Edit Image Settings', onAction: expectedSettingsAction }],
           [tinyMCE.buttons.code, { text: 'HTML', tooltip: 'Source code', onAction: openSourceCodeModal }],
           ['customLabelButton', {
@@ -165,6 +172,7 @@ describe('TinyMceEditor hooks', () => {
           }],
         ]);
         expect(openImgModal).not.toHaveBeenCalled();
+        expect(openAudioModal).not.toHaveBeenCalled();
         expect(editor.on).toHaveBeenCalled();
       });
     });
@@ -238,6 +246,7 @@ describe('TinyMceEditor hooks', () => {
         images: mockImagesRef,
         isLibrary: false,
         learningContextId: 'course+org+run',
+        enableAudioUpload: true,
       };
       const evt = 'fakeEvent';
       const editor = 'myEditor';
@@ -246,6 +255,7 @@ describe('TinyMceEditor hooks', () => {
       beforeEach(() => {
         props.setEditorRef = jest.fn();
         props.openImgModal = jest.fn();
+        props.openAudioModal = jest.fn();
         props.openSourceCodeModal = jest.fn();
         props.initializeEditor = jest.fn();
         props.updateContent = jest.fn();
@@ -259,6 +269,7 @@ describe('TinyMceEditor hooks', () => {
           const pluginProps = {
             isLibrary: props.isLibrary,
             editorType: props.editorType,
+            enableAudioUpload: true,
           };
           expect(output.init.plugins).toEqual(pluginConfig(pluginProps).plugins);
           expect(output.init.imagetools_toolbar).toEqual(pluginConfig(pluginProps).imageToolbar);
@@ -275,6 +286,7 @@ describe('TinyMceEditor hooks', () => {
           const pluginProps = {
             isLibrary: true,
             editorType: props.editorType,
+            enableAudioUpload: true,
           };
           output = module.editorConfig({ ...props, isLibrary: true });
           expect(output.init.plugins).toEqual(pluginConfig(pluginProps).plugins);
@@ -297,6 +309,7 @@ describe('TinyMceEditor hooks', () => {
           output = module.editorConfig({
             ...props,
             editorType: 'question',
+            enableAudioUpload: false,
             placeholder: 'soMEtExT',
           });
           expect(output.init.plugins).toEqual(pluginConfig(pluginProps).plugins);
@@ -320,6 +333,7 @@ describe('TinyMceEditor hooks', () => {
           output = module.editorConfig({
             ...props,
             editorType: 'expandable',
+            enableAudioUpload: false,
             placeholder: 'soMEtExT',
           });
           expect(output.init.plugins).toEqual(pluginConfig(pluginProps).plugins);
@@ -352,6 +366,7 @@ describe('TinyMceEditor hooks', () => {
             editorType: props.editorType,
             updateContent: props.updateContent,
             openImgModal: props.openImgModal,
+            openAudioModal: props.openAudioModal,
             openSourceCodeModal: props.openSourceCodeModal,
             setImage: props.setSelection,
             images: mockImagesRef,
@@ -377,6 +392,19 @@ describe('TinyMceEditor hooks', () => {
       test('closeModal: calls setter with false', () => {
         hook.closeImgModal();
         expect(state.setState[hookKey]).toHaveBeenCalledWith(false);
+      });
+    });
+
+    describe('audioModalToggle', () => {
+      const hookKey = state.keys.isAudioModalOpen;
+      beforeEach(() => {
+        hook = module.audioModalToggle();
+      });
+      test('opens and closes the modal', () => {
+        hook.openAudioModal();
+        hook.closeAudioModal();
+        expect(state.setState[hookKey]).toHaveBeenNthCalledWith(1, true);
+        expect(state.setState[hookKey]).toHaveBeenNthCalledWith(2, false);
       });
     });
 

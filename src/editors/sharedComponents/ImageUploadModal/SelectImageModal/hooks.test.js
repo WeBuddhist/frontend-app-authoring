@@ -74,6 +74,13 @@ describe('SelectImageModal hooks', () => {
         hook.clearSearchString();
         expect(state.setState.searchString).toHaveBeenCalledWith('');
       });
+      test('forwards search changes when server search is configured', () => {
+        const searchAssets = jest.fn();
+        hook = hooks.searchAndSortHooks({ searchAssets });
+        hook.onSearchChange({ target: { value: testValue } });
+        hook.clearSearchString();
+        expect(searchAssets.mock.calls).toEqual([[testValue], ['']]);
+      });
       test('onSortClick takes a key and returns callback to set sortBY to that key', () => {
         hook.onSortClick(testValue);
         expect(state.setState.sortBy).not.toHaveBeenCalled();
@@ -185,6 +192,15 @@ describe('SelectImageModal hooks', () => {
             images: props.images,
           }));
         });
+        test('fetches the next page with the active search string', () => {
+          const fetchAssets = jest.fn(args => ({ fetchAssets: args }));
+          hook = hooks.imgListHooks({ ...props, fetchAssets });
+          hook.galleryProps.fetchNextPage({ pageNumber: 3 });
+          expect(dispatch).toHaveBeenCalledWith(fetchAssets({
+            pageNumber: 3,
+            searchString: props.searchSortProps.searchString,
+          }));
+        });
       });
       describe('galleryError', () => {
         test('show is initialized to false and returns properly', () => {
@@ -269,6 +285,8 @@ describe('SelectImageModal hooks', () => {
         expect(dispatch).toHaveBeenCalledWith(thunkActions.app.uploadAsset({
           file: testValue,
           setSelection,
+          assetType: undefined,
+          searchString: undefined,
         }));
       });
     });
@@ -301,7 +319,7 @@ describe('SelectImageModal hooks', () => {
       expect(hook.fileInput).toEqual(fileInputHooks);
       expect(spies.file.mock.calls.length).toEqual(1);
       expect(spies.file).toHaveBeenCalledWith({
-        setSelection, clearSelection, imgList: imgListHooks,
+        setSelection, clearSelection, imgList: imgListHooks, assetType: undefined, searchString: undefined,
       });
     });
     it('initializes imgListHooks with setSelection,searchAndSortHooks, and images', () => {
@@ -317,7 +335,7 @@ describe('SelectImageModal hooks', () => {
       expect(hook.searchSortProps).toEqual(searchAndSortHooks);
       expect(spies.file.mock.calls.length).toEqual(1);
       expect(spies.file).toHaveBeenCalledWith({
-        setSelection, clearSelection, imgList: imgListHooks,
+        setSelection, clearSelection, imgList: imgListHooks, assetType: undefined, searchString: undefined,
       });
     });
     it('forwards galleryProps and selectBtnProps from the image list hooks', () => {

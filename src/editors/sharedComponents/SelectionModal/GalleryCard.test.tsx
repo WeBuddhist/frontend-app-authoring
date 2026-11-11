@@ -78,6 +78,18 @@ describe('GalleryCard', () => {
     expect(screen.getByText('Fallback Image')).toBeInTheDocument();
   });
 
+  it('renders a requested fallback without loading the asset as an image', () => {
+    render(
+      <GalleryCard
+        asset={baseAsset}
+        thumbnailFallback={<div>Audio file</div>}
+        alwaysShowThumbnailFallback
+      />,
+    );
+    expect(screen.getByText('Audio file')).toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
   it('does not render status badge if statusMessage or statusBadgeVariant is missing', () => {
     const asset = { ...baseAsset, statusMessage: null };
     render(<GalleryCard asset={asset} />);
