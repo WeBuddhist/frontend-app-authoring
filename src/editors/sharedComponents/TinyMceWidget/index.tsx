@@ -46,12 +46,13 @@ const TinyMceWidget = ({
   audios,
   images,
   enableImageUpload,
+  enableAudioUpload,
   isLibrary,
   onChange,
   staticRootUrl,
   ...editorConfig
 }) => {
-  const enableAudioUpload = editorType === 'text' && !isLibraryV1Key(learningContextId);
+  const audioUploadEnabled = enableAudioUpload && editorType === 'text' && !isLibraryV1Key(learningContextId);
   const { isImgOpen, openImgModal, closeImgModal } = hooks.imgModalToggle();
   const { isAudioOpen, openAudioModal, closeAudioModal } = hooks.audioModalToggle();
   const { isSourceCodeOpen, openSourceCodeModal, closeSourceCodeModal } = hooks.sourceCodeModalToggle(editorRef);
@@ -60,7 +61,7 @@ const TinyMceWidget = ({
 
   return (
     <>
-      {enableAudioUpload && (
+      {audioUploadEnabled && (
         <AudioUploadModal
           audios={audios}
           close={closeAudioModal}
@@ -102,7 +103,7 @@ const TinyMceWidget = ({
             editorType,
             // @ts-ignore FIXME: 'editorRef' is not an accepted parameter of editorConfig()
             editorRef,
-            enableAudioUpload,
+            enableAudioUpload: audioUploadEnabled,
             enableImageUpload: isLibraryV1Key(learningContextId) ? false : enableImageUpload,
             learningContextId,
             images: imagesRef,
@@ -128,6 +129,7 @@ TinyMceWidget.defaultProps = {
   disabled: false,
   editorContentHtml: undefined,
   enableImageUpload: true,
+  enableAudioUpload: true,
   onChange: () => ({}),
   ...editorConfigDefaultProps,
 };
@@ -144,6 +146,7 @@ TinyMceWidget.propTypes = {
   disabled: PropTypes.bool,
   editorContentHtml: PropTypes.string,
   enableImageUpload: PropTypes.bool,
+  enableAudioUpload: PropTypes.bool,
   onChange: PropTypes.func,
   ...editorConfigPropTypes,
 };

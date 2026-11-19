@@ -60,6 +60,7 @@ export const WysiwygEditor = ({
       learningContextId={courseId}
       images={{}}
       enableImageUpload={false}
+      enableAudioUpload={false}
       onEditorChange={() => ({})}
     />
   );
