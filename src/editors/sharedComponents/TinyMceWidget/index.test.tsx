@@ -65,6 +65,7 @@ describe('TinyMceWidget', () => {
     learningContextId: 'course+org+run',
     editorContentHtml: undefined,
     enableImageUpload: undefined,
+    enableAudioUpload: undefined,
     onChange: undefined,
     staticRootUrl: undefined,
   };
@@ -105,6 +106,12 @@ describe('TinyMceWidget', () => {
       const { container } = editorRender(<TinyMceWidget {...props} enableImageUpload={false} />);
       expect(container.querySelector('imageuploadmodal')).not.toBeInTheDocument();
       expect(container.querySelector('sourcecodemodal')).toBeInTheDocument();
+    });
+
+    test('audio upload can be disabled outside the editor store', () => {
+      const { container } = editorRender(<TinyMceWidget {...props} enableAudioUpload={false} />);
+      expect(container.querySelector('audiouploadmodal')).not.toBeInTheDocument();
+      expect(hooks.editorConfig).toHaveBeenCalledWith(expect.objectContaining({ enableAudioUpload: false }));
     });
   });
 });
